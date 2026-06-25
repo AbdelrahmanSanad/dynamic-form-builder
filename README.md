@@ -16,6 +16,23 @@ the server (authoritative validation) when a submission arrives.
 
 ---
 
+## Live demo
+
+**https://dynamic-form-builder-production-a239.up.railway.app/**
+
+Demo account for the builder/dashboard:
+
+```
+Email:    demo@example.com
+Password: password123
+```
+
+> Hosted on Railway's free trial tier as a single service (the API serves the
+> built SPA from the same origin). Uploaded files use ephemeral storage, so they
+> may not persist across redeploys.
+
+---
+
 ## Quick start (Docker)
 
 The fastest way to run the whole stack:
