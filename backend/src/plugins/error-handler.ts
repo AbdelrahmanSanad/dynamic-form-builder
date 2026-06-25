@@ -28,14 +28,9 @@ function send(reply: FastifyReply, body: ErrorBody): void {
  * generic 500 so internal details never leak to clients.
  */
 async function errorHandlerPlugin(app: FastifyInstance): Promise<void> {
-  app.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
-    send(reply, {
-      statusCode: 404,
-      code: 'NOT_FOUND',
-      message: `Route ${request.method} ${request.url} not found`,
-    });
-  });
-
+  // Note: the not-found handler lives in the `spa` plugin so it can fall back to
+  // the SPA's index.html for client-side routes while still returning JSON 404
+  // for unmatched API routes.
   app.setErrorHandler((error: FastifyError, request: FastifyRequest, reply: FastifyReply) => {
     // 1. Request schema validation (params/query/body) via Zod.
     if (hasZodFastifySchemaValidationErrors(error)) {

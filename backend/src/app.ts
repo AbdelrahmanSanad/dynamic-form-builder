@@ -17,6 +17,7 @@ import errorHandlerPlugin from './plugins/error-handler.js';
 import multipartPlugin from './plugins/multipart.js';
 import prismaPlugin from './plugins/prisma.js';
 import securityPlugin from './plugins/security.js';
+import spaPlugin from './plugins/spa.js';
 import swaggerPlugin from './plugins/swagger.js';
 
 declare module 'fastify' {
@@ -64,6 +65,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(formRoutes, { prefix: '/api/forms' });
   await app.register(submissionRoutes, { prefix: '/api' });
   await app.register(publicRoutes, { prefix: '/api/public' });
+
+  // SPA + not-found handler last, so API routes always take precedence.
+  await app.register(spaPlugin);
 
   await app.ready();
   return app;

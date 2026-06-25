@@ -30,6 +30,14 @@ const envSchema = z.object({
     .default('http://localhost:5173')
     .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean)),
 
+  // ─── Static SPA ───────────────────────────────────────────────────────────
+  /**
+   * Directory (relative to cwd or absolute) holding the built React SPA. When it
+   * exists, the API serves it from the same origin so the SameSite=Lax auth
+   * cookie keeps working. Absent in dev/tests, where only the API runs.
+   */
+  STATIC_DIR: z.string().default('public'),
+
   // ─── File uploads ─────────────────────────────────────────────────────────
   /** Directory where uploaded files are stored (relative to cwd or absolute). */
   UPLOAD_DIR: z.string().default('./uploads'),
