@@ -1,0 +1,71 @@
+// Prisma schema for the Dynamic Form Builder.
+//
+// Design notes:
+// - A Form's field definitions are stored as JSONB (`schema`) so the set of
+//   fields is fully dynamic and does not require migrations to evolve.
+// - A Submission's answers are likewise stored as JSONB (`data`), validated at
+//   write time against the parent form's field definitions.
+// - Public access uses an unguessable `slug` rather than the numeric/UUID id.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  forms Form[]
+
+  @@map("users")
+}
+
+enum FormStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Form {
+  id          String     @id @default(uuid()) @db.Uuid
+  ownerId     String     @db.Uuid
+  title       String
+  description String?
+  status      FormStatus @default(DRAFT)
+  // Unguessable public identifier; only set/relevant once published.
+  slug        String     @unique
+  // Array of field definitions — see FormFieldSchema (Zod) in the app layer.
+  schema      Json
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@index([ownerId])
+  @@map("forms")
+}
+
+model Submission {
+  id        String   @id @default(uuid()) @db.Uuid
+  formId    String   @db.Uuid
+  // Map of field name -> answer, validated against the form schema at write time.
+  data      Json
+  // Lightweight request metadata captured for auditing (ip, user agent).
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId])
+  @@map("submissions")
+}

@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+.env.local
+*.log
+coverage
+.DS_Store
+
+# Uploaded files (local-disk storage)
+uploads/
+
+# Local-only Claude Code settings (permissions etc.)
+.claude/settings.local.json

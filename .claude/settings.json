@@ -1,0 +1,54 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm install *)",
+      "Bash(npm ci)",
+      "Bash(npm ci *)",
+      "Bash(npm run *)",
+      "Bash(npm test)",
+      "Bash(npm test *)",
+      "Bash(npx vitest *)",
+      "Bash(npx tsc *)",
+      "Bash(npx prisma *)",
+      "Bash(docker compose *)",
+      "Bash(docker build *)",
+      "Bash(docker images *)",
+      "Bash(docker ps *)",
+      "Bash(docker logs *)",
+      "Bash(docker rmi *)",
+      "Bash(curl -s http://localhost:*)"
+    ],
+    "deny": [
+      "Read(backend/.env)",
+      "Read(frontend/.env)",
+      "Read(backend/.env.local)",
+      "Read(frontend/.env.local)",
+      "Edit(backend/.env)",
+      "Edit(frontend/.env)",
+      "Edit(backend/.env.local)",
+      "Edit(frontend/.env.local)",
+      "Write(backend/.env)",
+      "Write(frontend/.env)",
+      "Write(backend/.env.local)",
+      "Write(frontend/.env.local)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{ "type": "command", "command": "node .claude/hooks/protect-secrets.mjs" }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "node .claude/hooks/format.mjs" },
+          { "type": "command", "command": "node .claude/hooks/mirror-warn.mjs" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: form_builder
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d form_builder']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/form_builder?schema=public
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-to-a-long-random-secret-32+}
+      JWT_EXPIRES_IN: 7d
+      # Cookie stays first-party because the web container proxies /api.
+      COOKIE_SECURE: 'false'
+      CORS_ORIGIN: http://localhost:8080
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      # Persist uploaded files across container restarts. NOTE: local disk does
+      # not survive a host change; S-18 swaps the StorageService for object storage.
+      - uploads_data:/app/uploads
+    ports:
+      - '4000:4000'
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - '8080:80'
+
+volumes:
+  db_data:
+  uploads_data:
